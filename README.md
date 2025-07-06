@@ -1,73 +1,138 @@
-# LCD 显示例程
+# 花灵智控 (PhytoLink)——基于 RT-Thread 的智慧花卉养护系统 🌸
 
-## 简介
+## 一、项目概述
+花灵智控 (PhytoLink) 是基于 RT-Thread 实时操作系统，运行于 STM32F407ZGTx 星火一号开发板的花卉智能养护方案。通过集成 AHT20 温湿度传感器与 AP3216C 环境光传感器，实现环境数据的实时采集、本地可视化显示及基于 WebClient 的网络传输，为花卉养护提供低成本、高可靠性的智能化监测方案 🌱。
 
-本例程主要介绍了如何在 LCD 上显示文字和图片。
+## 二、核心硬件配置 🔧
 
-## 硬件说明
+### （一）核心平台
+- **星火一号开发板**
+- **主控**：STM32F407ZGTx（Cortex-M4 内核，168MHz 主频，支持 FPU 浮点运算）
+- **集成资源**：
+  - 2.4 英寸 TFT-LCD 显示屏（320×240，RGB 接口）
+  - 板载 Wi-Fi 模块（支持 STA 模式）
+  - 标准 I2C/I2S/USART 外设
 
-星火 1 号开发板板载的是一块 1.3 寸，分辨率为 240x240 的 LCD 显示屏，显示效果十分细腻。显示屏的驱动芯片是 ST7789 v3, 通信接口使用的是 8080 并口，通过 fsmc 模拟出驱动时序和单片机进行通讯。使用了 8 根数据线传输数据，一根地址选择线作为芯片的使能信号。
+### （二）传感器模块
 
-![LCD 原理图](figures/lcd.png)
-
-![LCD 位置图](figures/board.png)
-
-## 软件说明
-
-本例程的源码位于 `/projects/03_driver_lcd`。
-
-显示图片和文字的源代码位于 libraries/Board_Drivers/lcd/drv_lcd.c 中。
-
-在 main 函数中，通过调用已经封装好的 LCD API 函数，首先执行的是清屏操作，将 LCD 全部刷成白色。然后设置画笔的颜色为黑色，背景色为白色。接着显示 RT-Thread 的 LOGO。最后会显示一些信息，包括 16x16 像素， 24x24 像素和 32x32 像素的三行英文字符，一条横线和一个同心圆。
-
-```c
-int main(void)
-{
-    lcd_clear(WHITE);
-
-    /* show RT-Thread logo */
-    lcd_show_image(0, 0, 240, 69, image_rttlogo);
-
-    /* set the background color and foreground color */
-    lcd_set_color(WHITE, BLACK);
-
-    /* show some string on lcd */
-    lcd_show_string(10, 69, 16, "Hello, RT-Thread!");
-    lcd_show_string(10, 69 + 16, 24, "RT-Thread");
-    lcd_show_string(10, 69 + 16 + 24, 32, "RT-Thread");
-
-    /* draw a line on lcd */
-    lcd_draw_line(0, 69 + 16 + 24 + 32, 240, 69 + 16 + 24 + 32);
-
-    /* draw a concentric circles */
-    lcd_draw_point(120, 194);
-    for (int i = 0; i < 46; i += 4)
-    {
-        lcd_draw_circle(120, 194, i);
-    }
-    return 0;
-}
+```mermaid
+graph TD
+    subgraph AHT20[温湿度传感器]
+        A1[功能] --> A2[温湿度采集]
+        A3[核心参数] --> A4[温度精度 ±0.3℃]
+        A3[核心参数] --> A5[湿度精度 ±2% RH]
+        A3[核心参数] --> A6[1.8V 供电]
+        A7[接口] --> A8[I2C]
+        A9[特性] --> A10[内置 14 位 ADC]
+        A9[特性] --> A11[单总线协议]
+    end
+    
+    subgraph AP3216C[环境光传感器]
+        B1[功能] --> B2[光强检测]
+        B3[核心参数] --> B4[0-65535 lux]
+        B3[核心参数] --> B5[16 位分辨率]
+        B6[接口] --> B7[I2C]
+        B8[特性] --> B9[环境光检测]
+        B8[特性] --> B10[红外光检测]
+        B8[特性] --> B11[接近检测]
+    end
 ```
 
-## 运行
+### （三）硬件特性
+- **即插即用**：传感器通过板载 I2C 接口直接连接，无需额外电路设计
+- **显示模块**：24 位真彩色 LCD 实时显示数据，支持中文/英文界面切换
 
-### 编译 & 下载
+## 三、核心功能架构 🌐
 
-- RT-Thread Studio：在 RT-Thread Studio 的包管理器中下载 `STM32F407-RT-SPARK` 资源包，然后创建新工程，执行编译。
-- MDK：首先双击 mklinks.bat，生成 rt-thread 与 libraries 文件夹链接；再使用 Env 生成 MDK5 工程；最后双击 project.uvprojx 打开 MDK5 工程，执行编译。
+### （一）数据流转流程
 
-编译完成后，将开发板的 ST-Link USB 口与 PC 机连接，然后将固件下载至开发板。
+```mermaid
+flowchart LR
+    A[传感器采集] --> B[数据预处理]
+    B --> C[本地可视化]
+    B --> D[网络传输]
+```
 
-### 运行效果
+### （二）功能模块
+1. **实时数据采集**
+   - 双传感器并行采集（1Hz 频率）
+   - 通过 RT-Thread 互斥锁避免 I2C 总线冲突
+   - 数据预处理：滑动窗口滤波算法（窗口大小 5）去除高频噪声
 
-按下复位按键重启开发板，观察开发板上 LCD 的实际效果。正常运行后，LCD 上会显示 RT-Thread LOGO，下面会显示 3 行大小为 16、 24、 32 像素的文字，文字下面是一行直线，直线的下方是一个同心圆。如下图所示：
+2. **本地可视化**
+   - LCD 显示界面包含：
+     - 实时温湿度曲线（10 分钟趋势）
+     - 光强柱状图（0-65535lux 量程）
+     - 网络连接状态指示灯（绿色/红色）
 
-![LCD 显示图案](figures/lcd_show_logo.png)
+3. **网络传输**
+   - 基于 RT-Thread WebClient 组件实现 HTTP GET 上传
+   - 支持参数：`http://服务器IP:端口/upload?temp=25&humi=60&light=2000`
+   - 可靠性设计：5 次重试机制（间隔 1s→32s 指数退避）
 
-## 注意事项
+## 四、软件技术实现 🛠️
 
-屏幕的分辨率是 240x240，输入位置参数时要注意小于 240，不然会出现无法显示的现象。图像的取模方式为自上而下，自左向右，高位在前， 16 位色（RGB-565）。本例程未添加中文字库，不支持显示中文。
+### （一）RT-Thread 系统应用
+- **三线程架构**：
+  - 传感器采集（高优先级）
+  - LCD 刷新（中优先级）
+  - 网络传输（低优先级）
+- 使用 RT-Thread 设备驱动框架（DFS）实现传感器标准化操作
 
-## 引用参考
+### （二）WebClient 网络传输
+- 直接调用 RT-Thread WebClient 组件，无需额外移植 MQTT 协议栈
+- 支持 WPA2 加密 Wi-Fi 接入，配置 SSID/密码后自动连接
 
-暂无。
+## 五、系统架构图
+
+```mermaid
+graph TB
+    subgraph 硬件层
+        H1[STM32F407ZGTx] --> H2[AHT20传感器]
+        H1 --> H3[AP3216C传感器]
+        H1 --> H4[LCD显示屏]
+        H1 --> H5[Wi-Fi模块]
+    end
+    
+    subgraph RT-Thread系统
+        R1[设备驱动框架] --> R2[传感器驱动]
+        R1 --> R3[LCD驱动]
+        R1 --> R4[网络协议栈]
+    end
+    
+    subgraph 应用层
+        A1[数据采集线程] --> A2[数据处理]
+        A3[LCD刷新线程] --> A4[数据可视化]
+        A5[网络传输线程] --> A6[WebClient]
+    end
+    
+    硬件层 --> RT-Thread系统
+    RT-Thread系统 --> 应用层
+```
+
+## 六、竞赛创新点 🌟
+
+1. **轻量化物联网架构**
+   - 无需复杂协议栈（直接使用 RT-Thread 原生 WebClient）
+   - 传感器数据采集与网络传输解耦
+   - 通过互斥锁保证数据一致性
+
+2. **快速原型开发**
+   - 基于成熟开发板与现成传感器模块
+   - 48 小时内完成从硬件接线到网络传输的全流程调试
+
+3. **工程化设计**
+   - 完善的错误处理：
+     - 传感器读取失败自动复位
+     - 网络超时重试机制
+   - 模块化代码结构（驱动层/业务层/接口层分离）
+
+## 九、联系方式 📮
+- **代码仓库**：[Gitee](https://gitee.com/phyto-link)
+- **技术文档**：[项目 Wiki](https://gitee.com/phyto-link/wiki)
+- **联系邮箱**：phyto_link@163.com
+
+---
+
+**花灵智控 (PhytoLink) 团队**  
+2025 年 7 月 7 日
