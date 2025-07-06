@@ -127,11 +127,6 @@ graph TB
      - 网络超时重试机制
    - 模块化代码结构（驱动层/业务层/接口层分离）
 
-## 九、联系方式 📮
-- **代码仓库**：[Gitee](https://gitee.com/phyto-link)
-- **技术文档**：[项目 Wiki](https://gitee.com/phyto-link/wiki)
-- **联系邮箱**：phyto_link@163.com
-
 ---
 
 **花灵智控 (PhytoLink) 团队**  
