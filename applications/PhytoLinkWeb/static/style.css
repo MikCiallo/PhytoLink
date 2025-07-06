@@ -1,0 +1,58 @@
+/* 卡片悬停效果 */
+.sensor-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.sensor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* 进度条样式 */
+.gauge-container {
+    position: relative;
+    height: 15px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.gauge-value {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.5s ease;
+}
+.temp-gauge { background-color: #ff6b6b; }   /* 温度进度条颜色 */
+.humi-gauge { background-color: #4ecdc4; }   /* 湿度进度条颜色 */
+.light-gauge { background-color: #ffe66d; }  /* 光照进度条颜色 */
+
+/* 状态标签 */
+.status-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.status-normal { background-color: rgba(76, 175, 80, 0.7); } /* 正常状态 */
+.status-warning { background-color: rgba(255, 193, 7, 0.7); } /* 警告状态 */
+.status-danger { background-color: rgba(244, 67, 54, 0.7); } /* 危险状态 */
+
+/* 加载提示 */
+.chart-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 280px;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+/* 其他样式 */
+.update-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}

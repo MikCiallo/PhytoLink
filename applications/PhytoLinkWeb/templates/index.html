@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>环境监测仪表盘</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <!-- 标题 -->
+        <header class="mb-4 text-center">
+            <h1 class="display-5 fw-bold text-primary">植物环境监测系统</h1>
+            <p class="lead text-muted">实时数据可视化仪表盘 - 适合室内植物养护</p>
+        </header>
+
+        <!-- 实时数据卡片 -->
+        <div class="row g-4" id="sensor-cards">
+            <!-- 温度卡片 -->
+            <div class="col-md-4 col-sm-6 position-relative">
+                <div class="card sensor-card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">温度</h5>
+                        <p class="card-text display-3" id="temp-value">-- °C</p>
+                        <div class="gauge-container">
+                            <div class="gauge-value temp-gauge"></div>
+                        </div>
+                        <small class="update-time">适宜范围: 18-28°C</small>
+                    </div>
+                    <span id="temp-status" class="status-tag status-normal">正常</span>
+                </div>
+            </div>
+
+            <!-- 湿度卡片 -->
+            <div class="col-md-4 col-sm-6 position-relative">
+                <div class="card sensor-card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">湿度</h5>
+                        <p class="card-text display-3" id="humi-value">-- %</p>
+                        <div class="gauge-container">
+                            <div class="gauge-value humi-gauge"></div>
+                        </div>
+                        <small class="update-time">适宜范围: 40-60%</small>
+                    </div>
+                    <span id="humi-status" class="status-tag status-normal">正常</span>
+                </div>
+            </div>
+
+            <!-- 光照卡片 -->
+            <div class="col-md-4 col-sm-6 position-relative">
+                <div class="card sensor-card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">光照</h5>
+                        <p class="card-text display-3" id="light-value">-- lux</p>
+                        <div class="gauge-container">
+                            <div class="gauge-value light-gauge"></div>
+                        </div>
+                        <small class="update-time" id="light-range">适宜范围: 白天1000-5000lux，夜晚0-500lux</small>
+                    </div>
+                    <span id="light-status" class="status-tag status-normal">正常</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据更新时间 -->
+        <div class="text-center mt-4 update-time" id="last-update">
+            最后更新: --
+        </div>
+
+        <!-- 历史数据图表 -->
+        <div class="mt-5 card">
+            <div class="card-header bg-primary text-white">
+                <h5>历史数据趋势 - 整体概览</h5>
+            </div>
+            <div class="card-body">
+                <div id="chart-loading" class="chart-loading">
+                    <div>正在加载历史数据...</div>
+                </div>
+                <canvas id="trendChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- 详细数据图表 -->
+        <div class="mt-4 card">
+            <div class="card-header bg-secondary text-white">
+                <h5>历史数据趋势 - 详细视图</h5>
+                <div class="btn-group mt-2" role="group">
+                    <button type="button" class="btn btn-light active" data-metric="temp">温度</button>
+                    <button type="button" class="btn btn-light" data-metric="humi">湿度</button>
+                    <button type="button" class="btn btn-light" data-metric="light">光照</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="detail-chart-loading" class="chart-loading">
+                    <div>正在加载详细数据...</div>
+                </div>
+                <canvas id="detailChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
